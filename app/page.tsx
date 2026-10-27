@@ -1,3 +1,10 @@
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Início | Terra em Movimento",
+  description: "Conheça o projeto Terra em Movimento",
+};
+
 export default function Home() {
   return (
     <>
