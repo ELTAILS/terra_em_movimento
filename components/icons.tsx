@@ -54,3 +54,85 @@ export function InstagramIcon(props: IconProps) {
     </svg>
   );
 }
+
+export function TerminalIcon(props: IconProps) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" {...props}>
+      <rect x="3.5" y="5" width="17" height="14" rx="1.5" />
+      <path d="m7 9 2.5 2L7 13M11.5 14h4" />
+    </svg>
+  );
+}
+
+export function GraduationCapIcon(props: IconProps) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" {...props}>
+      <path d="m3 9 9-4 9 4-9 4-9-4Z" />
+      <path d="M6 11v4.5c2.8 2.1 9.2 2.1 12 0V11M21 9v5" />
+    </svg>
+  );
+}
+
+export function WindowIcon(props: IconProps) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" {...props}>
+      <rect x="4" y="4" width="16" height="16" rx="2" />
+      <path d="M4 8h16M8 6h.01M11 6h.01" />
+    </svg>
+  );
+}
+
+export function PinIcon(props: IconProps) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" {...props}>
+      <path d="M19 10c0 5-7 10-7 10S5 15 5 10a7 7 0 1 1 14 0Z" />
+      <circle cx="12" cy="10" r="2" />
+    </svg>
+  );
+}
+
+export function BookIcon(props: IconProps) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" {...props}>
+      <path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H20v16H6.5A2.5 2.5 0 0 0 4 21V5.5Z" />
+      <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" />
+    </svg>
+  );
+}
+
+export function RocketIcon(props: IconProps) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" {...props}>
+      <path d="M14 5c2-2 5-2 5-2s0 3-2 5l-5 5-3-3 5-5Z" />
+      <path d="m9 10-3 .5-2 2 4 .5M14 15l-.5 3-2 2-.5-4M7 17l-2 2M5 15l-1 1" />
+      <circle cx="15.5" cy="6.5" r="1" />
+    </svg>
+  );
+}
+
+export function CodeIcon(props: IconProps) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" {...props}>
+      <path d="m8 8-4 4 4 4M16 8l4 4-4 4M14 5l-4 14" />
+    </svg>
+  );
+}
+
+export function MailIcon(props: IconProps) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" {...props}>
+      <rect x="3.5" y="5.5" width="17" height="13" rx="2" />
+      <path d="m5 7 7 5 7-5" />
+    </svg>
+  );
+}
+
+export function OrbitIcon(props: IconProps) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" {...props}>
+      <circle cx="12" cy="12" r="3" />
+      <ellipse cx="12" cy="12" rx="10" ry="4.5" transform="rotate(-25 12 12)" />
+      <ellipse cx="12" cy="12" rx="10" ry="4.5" transform="rotate(65 12 12)" />
+    </svg>
+  );
+}
