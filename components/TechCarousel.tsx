@@ -98,14 +98,14 @@ export default function TechCarousel({ technologies }: TechCarouselProps) {
         <span className="shrink-0 font-mono text-xs font-bold uppercase tracking-[0.08em] text-primary">
           stack.log
         </span>
-        <div className="relative min-w-0 flex-1">
+        <div className="relative min-w-0 flex-1 overflow-hidden">
           <div className="pointer-events-none absolute inset-y-0 left-0 z-10 w-8 bg-linear-to-r from-surface to-transparent" />
           <div className="pointer-events-none absolute inset-y-0 right-0 z-10 w-8 bg-linear-to-l from-surface to-transparent" />
           <div
             ref={trackRef}
             aria-hidden="true"
             inert
-            className="flex w-max motion-reduce:flex-wrap motion-reduce:w-full"
+            className="flex w-max motion-reduce:hidden"
           >
             {[0, 1].map((groupIndex) => (
               <div
@@ -121,6 +121,16 @@ export default function TechCarousel({ technologies }: TechCarouselProps) {
                   </span>
                 ))}
               </div>
+            ))}
+          </div>
+          <div className="hidden min-h-10 flex-wrap items-center motion-reduce:flex">
+            {technologies.map((technology) => (
+              <span
+                key={technology}
+                className="border-l border-border px-5 py-1 text-sm text-foreground"
+              >
+                {technology}
+              </span>
             ))}
           </div>
         </div>
