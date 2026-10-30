@@ -66,6 +66,7 @@ Proibido nesta tarefa
 new Date() ou Date.now() no Footer. O projeto usa cacheComponents: true, e a documentação local avisa que isso quebra o prerender. Deixe o ano fixo: 2026.
 Instalar dependências (ícones, GSAP, fontes).
 Inventar URLs de redes sociais.
+
 5. Decisões já tomadas (mude só se eu pedir)
 Footer sem o link "Home" (a rota / já é "Mundo"). Rótulos iguais aos do header (AGENTS.md §6).
 Pílula "Explorador do planeta": texto estático, não clicável.
