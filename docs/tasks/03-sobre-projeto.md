@@ -103,7 +103,7 @@ Escreva o plano curto no início da resposta (arquivos, riscos) e IMPLEMENTE em 
 - [ ] Sem scroll horizontal da página em 375, 768 e 1280 px.
 - [ ] Tab percorre a página em ordem lógica, com foco visível, e o efeito de hover aparece também no foco.
 
-## 8. peça para EU executar:
+## 8. Validação (execute de verdade e cole a saída)
 ```bash
 npm run lint
 npx tsc --noEmit

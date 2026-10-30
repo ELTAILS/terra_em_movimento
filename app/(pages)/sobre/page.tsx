@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import AboutFeatureCard from "@/components/AboutFeatureCard";
 import {
   BookIcon,
@@ -154,9 +155,9 @@ export default function Sobre() {
             </p>
             <div className="mt-5 flex flex-wrap gap-3">
               <span className="inline-flex items-center gap-2 rounded-md bg-primary px-4 py-2 text-xs font-semibold text-primary-foreground">
-                <a href="/">
+                <Link href="/">
                   visualizar globo 3d
-                </a>
+                </Link>
                 <span aria-hidden="true">→</span>
               </span>
               <span className="inline-flex items-center gap-2 rounded-md bg-surface-elevated px-4 py-2 text-xs font-semibold text-foreground">

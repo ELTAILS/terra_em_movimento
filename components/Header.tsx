@@ -12,7 +12,7 @@ export default function Header() {
         >
           TERRA EM MOVIMENTO<span className="ml-1 text-primary" aria-hidden="true">•</span>
         </Link>
-        <nav aria-label="Principal" className="order-3 w-full overflow-x-auto md:order-none md:w-auto md:flex-1">
+        <nav aria-label="Principal" className="order-3 w-full overflow-x-auto md:order-0 md:w-auto md:flex-1">
           <NavLinks />
         </nav>
         <div className="ml-auto flex items-center gap-3">
