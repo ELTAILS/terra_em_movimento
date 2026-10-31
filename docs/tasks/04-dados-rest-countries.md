@@ -106,7 +106,7 @@ Anotar também quantas chamadas reais o `npm run build` fez (cada build consome 
 
 Arquivos alterados · decisões extras · comandos e resultados reais · diferença entre `AGENTS.md` §7 e a documentação do Next · pendências · como testar manualmente.
 
-## 10. Amostra real da resposta (preencher antes de executar)
+## 10. Amostra real da resposta
 
 {
   "data": {
