@@ -19,10 +19,12 @@ const RESPONSE_FIELDS = [
   "names.official",
   "codes.alpha_2",
   "codes.alpha_3",
+  "codes.ccn3",
   "capitals",
   "region",
   "subregion",
   "population",
+  "timezones",
   "coordinates",
   "flag.emoji",
   "flag.url_svg",
@@ -162,6 +164,7 @@ function normalizeCountry(value: unknown): Country | null {
   return {
     code,
     alpha3Code: readString(codes?.alpha_3)?.toUpperCase() ?? null,
+    numericCode: readString(codes?.ccn3),
     name,
     officialName: readString(names?.official),
     capitals: readStringArray(record?.capitals).concat(
@@ -170,6 +173,7 @@ function normalizeCountry(value: unknown): Country | null {
     region: readString(record?.region),
     subregion: readString(record?.subregion),
     population: readNumber(record?.population),
+    timezones: readStringArray(record?.timezones),
     coordinates: readCoordinate(record?.coordinates),
     flag: {
       emoji: readString(flag?.emoji),

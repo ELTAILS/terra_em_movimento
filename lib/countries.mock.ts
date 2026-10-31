@@ -5,12 +5,14 @@ export const mockCountries: Country[] = [
   {
     code: "BR",
     alpha3Code: "BRA",
+    numericCode: "076",
     name: "Brasil",
     officialName: "República Federativa do Brasil",
     capitals: ["Brasília"],
     region: "Americas",
     subregion: "South America",
     population: 203080756,
+    timezones: ["UTC-03:00"],
     coordinates: { lat: -10, lng: -55 },
     flag: {
       emoji: "🇧🇷",
@@ -31,12 +33,14 @@ export const mockCountries: Country[] = [
   {
     code: "JP",
     alpha3Code: "JPN",
+    numericCode: "392",
     name: "Japão",
     officialName: "Estado do Japão",
     capitals: ["Tokyo"],
     region: "Asia",
     subregion: "Eastern Asia",
     population: 124516650,
+    timezones: ["UTC+09:00"],
     coordinates: { lat: 36, lng: 138 },
     flag: {
       emoji: "🇯🇵",
@@ -57,12 +61,14 @@ export const mockCountries: Country[] = [
   {
     code: "ZA",
     alpha3Code: "ZAF",
+    numericCode: "710",
     name: "África do Sul",
     officialName: "República da África do Sul",
     capitals: ["Pretoria", "Cape Town", "Bloemfontein"],
     region: "Africa",
     subregion: "Southern Africa",
     population: 60414495,
+    timezones: ["UTC+02:00"],
     coordinates: { lat: -29, lng: 24 },
     flag: {
       emoji: "🇿🇦",
