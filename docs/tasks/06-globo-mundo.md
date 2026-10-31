@@ -14,7 +14,7 @@ A página `/` (Mundo) passa a mostrar um globo 3D interativo com os polígonos d
 - `AGENTS.md` §6 “Mundo”, §8 (GeoJSON) e §9 (React Globe.gl).
 - Biblioteca: https://github.com/vasturiano/react-globe.gl e https://globe.gl/ (versão atual 2.38.0). Props confirmadas no README: `polygonsData`, `polygonGeoJsonGeometry`, `polygonCapColor`, `polygonSideColor`, `polygonStrokeColor`, `polygonAltitude`, `polygonLabel` (aceita HTML), `polygonsTransitionDuration`, `onPolygonHover(polygon, prev)`, `onPolygonClick(polygon, event, coords)`, `backgroundColor`, `showAtmosphere`, `atmosphereColor`, `onGlobeReady`. Sem `globeImageUrl`, o globo é uma esfera preta.
 - Design: se existir `docs/design/mundo.png`, use-o como referência visual da composição (globo grande como centro). Se não existir, siga o `AGENTS.md` §4 e §6 e não invente elementos.
-- Fatos verificados do GeoJSON (detalhes em `docs/data/geojson-origem.md`): 258 feições; propriedades `name`, `ISO3166-1-Alpha-2`, `ISO3166-1-Alpha-3`; 238 com alpha-2 válido e 20 com `-99` (Kosovo, Somaliland e áreas disputadas); Taiwan vem como `CN-TW`; 12 códigos ISO sem polígono (BQ, BV, CC, CX, GF, GP, MQ, RE, SJ, TK, TW, YT); os territórios ultramarinos franceses fazem parte do polígono da França.
+- Fatos verificados do GeoJSON (detalhes em `docs/data/geojson-origem.md`): 258 feições; propriedades `name`, `ISO3166-1-Alpha-2`, `ISO3166-1-Alpha-3`; 238 com alpha-2 válido e 20 com `-99` (Kosovo, Somaliland e áreas disputadas); Taiwan vem como `CN-TW`; 12 códigos ISO sem polígono (BQ, BV, CC, CX, GF, GP, MQ, RE, SJ, TK, TW, YT); os territórios ultramarinos franceses fazem parte do polígono da França. **Orientação dos contornos:** o `react-globe.gl` espera anel externo no sentido horário. O arquivo original da fonte vinha anti-horário, o que fazia a biblioteca gerar cerca de 2,7 milhões de triângulos (~30 s de CPU, globo "extremamente lento"); o arquivo do repositório foi reorientado e gera cerca de 95 mil triângulos (~0,8 s de CPU, medido fora do navegador).
 
 ## 3. Escopo
 
@@ -50,7 +50,7 @@ A página `/` (Mundo) passa a mostrar um globo 3D interativo com os polígonos d
 - Clique: seleciona o país; a câmera voa até as coordenadas dele (`pointOfView` com duração; duração 0 se `prefers-reduced-motion`). Fora do canvas, um rótulo provisório e discreto “País selecionado: {nome}” (região `aria-live="polite"`) com botão “Limpar seleção”. Exponha `onSelect(país | null)` para a Tarefa 07 ligar o painel.
 - Auto-rotação lenta, que pausa durante hover, arraste e seleção e fica desligada com `prefers-reduced-motion`. Câmera e rotação são da biblioteca; **sem GSAP** nisso.
 - Tamanho: contêiner com altura explícita e responsiva (viewport menos Header e Footer, mínimo de cerca de 480 px). Meça com `ResizeObserver` e passe `width`/`height` ao globo (por padrão a biblioteca usa a janela inteira). Sem rolagem horizontal; redimensionar a janela funciona.
-- Desempenho: `polygonsData`, acessores e callbacks memoizados; nada de buscar dados em hover, clique ou movimento de câmera (AGENTS §6). Meça FPS e travamentos em máquina real e relate. Navegar de `/` para `/paises` e voltar várias vezes não pode acumular memória nem erros no console.
+- Desempenho: `polygonsData`, acessores e callbacks memoizados; nada de buscar dados em hover, clique ou movimento de câmera (AGENTS §6). Meça FPS e travamentos em máquina real e relate. Meça também, com `performance.now()`, o tempo entre receber o GeoJSON e o globo estar pronto, e relate. Se esse tempo for de vários segundos, pare e me avise: a referência medida para criar a geometria é de menos de 1 s de CPU. Navegar de `/` para `/paises` e voltar várias vezes não pode acumular memória nem erros no console.
 
 **Estados**
 - Carregando (biblioteca ou GeoJSON): esqueleto circular ou mensagem curta no tema escuro.
@@ -65,7 +65,7 @@ A página `/` (Mundo) passa a mostrar um globo 3D interativo com os polígonos d
 
 ## 5. Decisões já tomadas
 
-1. GeoJSON simplificado a 5% (573 KB). Se o contorno parecer grosseiro ou lento, **eu** decido entre 10% (1,07 MB) e 3%; não regenere o arquivo sozinho.
+1. GeoJSON simplificado a 5% (573 KB) e com os contornos reorientados (anel externo horário); confira o `sha256` registrado em `docs/data/geojson-origem.md`. Se o contorno parecer grosseiro ou lento, **eu** decido entre 10% (1,07 MB) e 3%; não regenere o arquivo sozinho.
 2. Associação por alpha-2, com o alias `CN-TW`.
 3. Globo escuro sem textura, com países coloridos, para combinar com o tema e não depender de CDN.
 4. A seleção é provisória, sem painel de detalhes: o `CountryDetails` vem na Tarefa 07, e o `AGENTS.md` §6 prevê o clique abrindo o painel. Avise essa diferença na resposta final.
@@ -88,6 +88,7 @@ A página `/` (Mundo) passa a mostrar um globo 3D interativo com os polígonos d
 - [ ] Sem WebGL, aparece a mensagem alternativa com link para `/paises`.
 - [ ] `prefers-reduced-motion` desliga rotação automática e voo animado.
 - [ ] Nenhuma requisição à REST Countries parte do navegador.
+- [ ] O globo fica pronto em poucos segundos e gira e responde ao mouse de forma fluida.
 - [ ] Sem erros no console; navegar entre `/` e `/paises` repetidas vezes não degrada o desempenho.
 
 ## 8. Validação
