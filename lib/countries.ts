@@ -12,6 +12,8 @@ import type {
 
 const API_URL = "https://api.restcountries.com/countries/v5";
 const PAGE_SIZE = 100;
+const MAX_PAGES = 5;
+const FETCH_TIMEOUT_MS = 10_000;
 const RESPONSE_FIELDS = [
   "names.common",
   "names.official",
@@ -73,7 +75,7 @@ function readNumber(value: unknown): number | null {
   return typeof value === "number" && Number.isFinite(value) ? value : null;
 }
 
-function isNonNegativeInteger(value: unknown): boolean {
+function isNonNegativeInteger(value: unknown): value is number {
   return (
     typeof value === "number" &&
     Number.isInteger(value) &&
@@ -187,6 +189,9 @@ function normalizeCountry(value: unknown): Country | null {
 function normalizePage(value: unknown): {
   countries: Country[];
   more: boolean;
+  total: number;
+  discarded: number;
+  empty: boolean;
 } {
   const root = readRecord(value);
   const data = readRecord(root?.data);
@@ -204,17 +209,25 @@ function normalizePage(value: unknown): {
     throw new CountryFetchError("malformed-response");
   }
 
+  const countries = objects
+    .map(normalizeCountry)
+    .filter((country): country is Country => country !== null);
+
   return {
-    countries: objects
-      .map(normalizeCountry)
-      .filter((country): country is Country => country !== null),
+    countries,
     more: meta.more,
+    total: meta.total,
+    discarded: objects.length - countries.length,
+    empty: objects.length === 0,
   };
 }
 
 async function fetchCountriesPage(apiKey: string, offset: number): Promise<{
   countries: Country[];
   more: boolean;
+  total: number;
+  discarded: number;
+  empty: boolean;
 }> {
   const params = new URLSearchParams({
     response_fields: RESPONSE_FIELDS,
@@ -227,15 +240,11 @@ async function fetchCountriesPage(apiKey: string, offset: number): Promise<{
   try {
     response = await fetch(`${API_URL}?${params.toString()}`, {
       headers: { Authorization: `Bearer ${apiKey}` },
+      signal: AbortSignal.timeout(FETCH_TIMEOUT_MS),
     });
   } catch {
     throw new CountryFetchError("network");
   }
-
-  console.log("REST Countries request", {
-    offset,
-    status: response.status,
-  });
 
   if (response.status === 401) {
     throw new CountryFetchError("unauthorized", response.status);
@@ -274,17 +283,32 @@ async function getCachedCountries(): Promise<Country[]> {
   const countries: Country[] = [];
   let offset = 0;
   let more = true;
+  let pageCount = 0;
+  let total = 0;
+  let discarded = 0;
 
-  while (more) {
+  while (more && pageCount < MAX_PAGES) {
     const page = await fetchCountriesPage(apiKey, offset);
     countries.push(...page.countries);
+    total = page.total;
+    discarded += page.discarded;
     more = page.more;
     offset += PAGE_SIZE;
+    pageCount += 1;
+
+    if (page.empty) {
+      break;
+    }
   }
 
   if (countries.length === 0) {
     throw new CountryFetchError("empty-collection");
   }
+
+  console.log("REST Countries temporary summary", {
+    total,
+    discarded,
+  });
 
   return countries;
 }
@@ -325,18 +349,19 @@ export async function getCountries(): Promise<CountriesResult> {
       return { status: "success", countries: mockCountries };
     }
 
-    return {
-      status: "error",
-      error: {
-        reason: "missing-key",
-        message: errorMessage("missing-key"),
-      },
-    };
   }
 
   try {
     return { status: "success", countries: await getCachedCountries() };
   } catch (error) {
+    if (
+      process.env.NODE_ENV === "production" &&
+      error instanceof CountryFetchError &&
+      error.reason === "missing-key"
+    ) {
+      throw error;
+    }
+
     return { status: "error", error: toDataError(error) };
   }
 }
