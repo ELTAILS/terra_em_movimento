@@ -24,6 +24,7 @@ const technologies = [
   "GeoJSON local",
   "REST Countries",
   "GSAP",
+  "GitHub Copilot",
 ];
 
 function OrbitalIllustration() {
