@@ -30,7 +30,7 @@ async function CountriesContent() {
 export default function Paises() {
   return (
     <div className="relative overflow-hidden px-5 py-12 sm:px-8 lg:px-12 lg:py-16">
-      <div aria-hidden="true" className="pointer-events-none absolute -top-32 left-1/2 h-80 w-[42rem] -translate-x-1/2 rounded-full bg-primary/10 blur-3xl" />
+      <div aria-hidden="true" className="pointer-events-none absolute -top-32 left-1/2 h-80 w-2xl -translate-x-1/2 rounded-full bg-primary/10 blur-3xl" />
       <div className="relative mx-auto max-w-7xl">
         <Suspense fallback={<CountriesSkeleton />}>
           <CountriesContent />

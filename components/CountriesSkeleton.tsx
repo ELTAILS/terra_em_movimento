@@ -7,7 +7,7 @@ export default function CountriesSkeleton() {
       {Array.from({ length: 6 }, (_, index) => (
         <div
           key={index}
-          className="motion-safe:animate-pulse h-[360px] rounded-2xl border border-border bg-surface"
+          className="motion-safe:animate-pulse h-90 rounded-2xl border border-border bg-surface"
         />
       ))}
     </div>
