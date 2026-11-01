@@ -346,19 +346,17 @@ export default function GlobeScene({
         : 0.012,
     [selectedCountry?.id],
   );
-  const polygonLabel = useCallback(
-    (polygon: object) => {
-      if (!isGlobePolygon(polygon) || !polygon.country) {
-        return "";
-      }
+  const polygonLabel = useCallback((polygon: object) => {
+    if (!isGlobePolygon(polygon) || !polygon.country) return "";
 
-      const flag = polygon.country.flagEmoji
-        ? `<span aria-hidden="true">${escapeHtml(polygon.country.flagEmoji)}</span> `
-        : "";
-      return `<div>${flag}${escapeHtml(polygon.country.name)}</div>`;
-    },
-    [],
-  );
+    const { flagUrl, name } = polygon.country;
+
+    const flag = flagUrl && flagUrl.startsWith("https://")
+      ? `<img src="${escapeHtml(flagUrl)}" alt="" width="24" height="16" style="display:inline-block;vertical-align:middle;margin-right:6px;border-radius:2px" />`
+      : "";
+      
+    return `<div>${flag}${escapeHtml(name)}</div>`;
+  }, []);
 
   useEffect(() => {
     const globe = globeRef.current;
@@ -380,7 +378,6 @@ export default function GlobeScene({
       controls.removeEventListener("start", pause);
       controls.removeEventListener("end", resume);
       controls.autoRotate = false;
-      globe?.renderer().dispose();
     };
   }, [selectedCountry, setGlobeRotation, readyAt]);
 
