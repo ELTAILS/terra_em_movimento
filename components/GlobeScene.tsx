@@ -12,6 +12,7 @@ import {
 import type { GlobeMethods } from "react-globe.gl";
 
 import GlobeFallback from "@/components/GlobeFallback";
+import CountryDetails from "@/components/CountryDetails";
 import {
   linkFeaturesToCountries,
   parseGeoJson,
@@ -424,22 +425,20 @@ export default function GlobeScene({
             />
           )}
         </div>
+        {selectedCountry ? (
+          <CountryDetails
+            country={selectedCountry}
+            onClose={clearSelection}
+            className="absolute inset-x-3 bottom-3 z-10 sm:bottom-3 sm:left-auto sm:right-3 sm:top-3 sm:h-[calc(100%-1.5rem)] sm:max-h-[calc(100%-1.5rem)] sm:w-[min(24rem,calc(100%-1.5rem))]"
+          />
+        ) : null}
       </div>
-      <div className="mt-3 flex flex-wrap items-center justify-between gap-3">
-        <p aria-live="polite" className="text-sm text-muted">
+      <div className="sr-only" aria-live="polite">
+        <p>
           {selectedCountry
             ? `País selecionado: ${selectedCountry.name}`
             : "Nenhum país selecionado"}
         </p>
-        {selectedCountry ? (
-          <button
-            className="rounded-lg border border-border px-3 py-2 text-sm font-medium text-foreground outline-none transition-colors hover:border-primary hover:text-primary focus-visible:ring-2 focus-visible:ring-ring"
-            type="button"
-            onClick={clearSelection}
-          >
-            Limpar seleção
-          </button>
-        ) : null}
       </div>
       <p className="mt-2 text-center text-sm text-muted">
         Para navegar pela lista com teclado,{" "}

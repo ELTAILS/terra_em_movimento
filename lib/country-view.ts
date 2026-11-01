@@ -14,10 +14,14 @@ export type CountryCardView = {
   flagEmoji: string | null;
   flagAlt: string;
   capital: string;
+  capitals: string[];
+  languages: { name: string; nativeName: string | null }[];
   currency: string;
+  currencies: string[];
   population: string;
   populationValue: number | null;
   timezone: string;
+  timezones: string[];
   coordinates: string;
   searchText: string;
 };
@@ -65,6 +69,9 @@ const displayNames = new Intl.DisplayNames("pt-BR", {
 const currencyNames = new Intl.DisplayNames("pt-BR", {
   type: "currency",
 });
+const languageNames = new Intl.DisplayNames("pt-BR", {
+  type: "language",
+});
 const numberFormat = new Intl.NumberFormat("pt-BR");
 
 function normalizeSearchText(value: string) {
@@ -107,6 +114,34 @@ function formatCurrency(country: Country) {
     : "";
 
   return `${label}${code ? ` (${code})` : ""}${extra}`;
+}
+
+function formatCurrencies(country: Country) {
+  return country.currencies.map((currency) => {
+    const code = currency.code?.toUpperCase() ?? null;
+    const label = currencyName(code, currency.name);
+    return `${label}${code ? ` (${code})` : ""}`;
+  });
+}
+
+function formatLanguages(country: Country) {
+  return country.languages.map((language) => {
+    const languageCode = language.iso6391 ?? language.iso6393;
+    let name = language.name;
+
+    if (languageCode) {
+      try {
+        name = languageNames.of(languageCode) ?? language.name;
+      } catch {
+        name = language.name;
+      }
+    }
+
+    return {
+      name: name.charAt(0).toLocaleUpperCase("pt-BR") + name.slice(1),
+      nativeName: language.nativeName,
+    };
+  });
 }
 
 function formatCoordinates(country: Country) {
@@ -165,12 +200,16 @@ export function toCountryCardView(country: Country): CountryCardView {
     flagEmoji: country.flag.emoji,
     flagAlt: country.flag.description ?? `Bandeira de ${name}`,
     capital,
+    capitals: country.capitals,
+    languages: formatLanguages(country),
     currency: formatCurrency(country),
+    currencies: formatCurrencies(country),
     population: country.population === null
       ? "Não informado"
       : numberFormat.format(country.population),
     populationValue: country.population,
     timezone,
+    timezones: country.timezones,
     coordinates: formatCoordinates(country),
     searchText,
   };

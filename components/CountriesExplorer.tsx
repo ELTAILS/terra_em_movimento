@@ -8,6 +8,7 @@ import {
   SearchIcon,
 } from "@/components/icons";
 import CountryCard from "@/components/CountryCard";
+import CountryDetails from "@/components/CountryDetails";
 import type { CountryCardView } from "@/lib/country-view";
 
 type CountriesExplorerProps = {
@@ -75,6 +76,7 @@ export default function CountriesExplorer({
   }, [countries, query, region, sortOrder]);
 
   const visibleCountries = filteredCountries.slice(0, visibleCount);
+  const selectedCountry = countries.find((country) => country.id === selectedId) ?? null;
 
   function resetVisibleCount() {
     setVisibleCount(12);
@@ -96,7 +98,8 @@ export default function CountriesExplorer({
   }
 
   return (
-    <section className="space-y-8">
+    <section className={selectedCountry ? "grid gap-8 lg:grid-cols-[minmax(0,1fr)_24rem]" : "space-y-8"}>
+      <div className="min-w-0 space-y-8">
       <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
         <div>
           <p className="flex items-center gap-2 text-xs font-semibold tracking-[0.18em] text-primary">
@@ -213,6 +216,14 @@ export default function CountriesExplorer({
           </button>
         )}
       </div>
+      </div>
+      {selectedCountry ? (
+        <CountryDetails
+          country={selectedCountry}
+          onClose={() => setSelectedId(null)}
+          className="fixed inset-x-3 bottom-3 z-30 sm:static sm:top-24 sm:max-h-[calc(100dvh-7rem)] sm:w-96 sm:self-start lg:sticky"
+        />
+      ) : null}
     </section>
   );
 }
