@@ -71,10 +71,17 @@ export default function GlobeScene() {
 
     const updateSize = () => {
       const { width, height } = container.getBoundingClientRect();
-      setSize({
+      const nextSize = {
         width: Math.max(0, Math.floor(width)),
         height: Math.max(480, Math.floor(height)),
-      });
+      };
+
+      setSize((currentSize) =>
+        currentSize.width === nextSize.width &&
+        currentSize.height === nextSize.height
+          ? currentSize
+          : nextSize,
+      );
     };
 
     updateSize();
@@ -121,46 +128,53 @@ export default function GlobeScene() {
   }, [webglAvailable]);
 
   return (
-    <div ref={containerRef} className="min-h-120 w-full overflow-hidden">
-      {webglAvailable === false ? (
-        <GlobeFallback kind="webgl" />
-      ) : error ? (
-        <GlobeFallback kind="error" message={error} />
-      ) : webglAvailable === null || features.length === 0 || size.width === 0 ? (
-        <GlobeFallback kind="loading" />
-      ) : (
-        <>
-          <Globe
-            width={size.width}
-            height={size.height}
-            backgroundColor="rgba(0, 0, 0, 0)"
-            globeImageUrl={null}
-            showAtmosphere
-            atmosphereColor={colors.primary}
-            atmosphereAltitude={0.12}
-            polygonsData={features}
-            polygonCapColor={() => colors.surface}
-            polygonSideColor={() => colors.border}
-            polygonStrokeColor={() => colors.primary}
-            polygonAltitude={0.012}
-            polygonsTransitionDuration={0}
-          />
-          <p className="sr-only">
-            O globo é uma visualização interativa. Para navegar pela lista com
-            teclado, acesse <a href="/paises">Países</a>.
-          </p>
-          <p className="mt-2 text-center text-sm text-muted">
-            Para navegar pela lista com teclado,{" "}
-            <a
-              className="font-medium text-primary underline-offset-4 outline-none hover:underline focus-visible:ring-2 focus-visible:ring-ring"
-              href="/paises"
-            >
-              acesse Países
-            </a>
-            .
-          </p>
-        </>
-      )}
-    </div>
+    <>
+      <div
+        ref={containerRef}
+        className="relative h-[clamp(30rem,70dvh,52rem)] w-full overflow-hidden"
+      >
+        <div className="absolute inset-0">
+          {webglAvailable === false ? (
+            <GlobeFallback kind="webgl" />
+          ) : error ? (
+            <GlobeFallback kind="error" message={error} />
+          ) : webglAvailable === null ||
+            features.length === 0 ||
+            size.width === 0 ? (
+            <GlobeFallback kind="loading" />
+          ) : (
+            <Globe
+              width={size.width}
+              height={size.height}
+              backgroundColor="rgba(0, 0, 0, 0)"
+              globeImageUrl={null}
+              showAtmosphere
+              atmosphereColor={colors.primary}
+              atmosphereAltitude={0.12}
+              polygonsData={features}
+              polygonCapColor={() => colors.surface}
+              polygonSideColor={() => colors.border}
+              polygonStrokeColor={() => colors.primary}
+              polygonAltitude={0.012}
+              polygonsTransitionDuration={0}
+            />
+          )}
+        </div>
+      </div>
+      <p className="sr-only">
+        O globo é uma visualização interativa. Para navegar pela lista com
+        teclado, acesse <a href="/paises">Países</a>.
+      </p>
+      <p className="mt-2 text-center text-sm text-muted">
+        Para navegar pela lista com teclado,{" "}
+        <a
+          className="font-medium text-primary underline-offset-4 outline-none hover:underline focus-visible:ring-2 focus-visible:ring-ring"
+          href="/paises"
+        >
+          acesse Países
+        </a>
+        .
+      </p>
+    </>
   );
 }
