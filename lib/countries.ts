@@ -288,14 +288,10 @@ async function getCachedCountries(): Promise<Country[]> {
   let offset = 0;
   let more = true;
   let pageCount = 0;
-  let total = 0;
-  let discarded = 0;
 
   while (more && pageCount < MAX_PAGES) {
     const page = await fetchCountriesPage(apiKey, offset);
     countries.push(...page.countries);
-    total = page.total;
-    discarded += page.discarded;
     more = page.more;
     offset += PAGE_SIZE;
     pageCount += 1;
@@ -308,11 +304,6 @@ async function getCachedCountries(): Promise<Country[]> {
   if (countries.length === 0) {
     throw new CountryFetchError("empty-collection");
   }
-
-  console.log("REST Countries temporary summary", {
-    total,
-    discarded,
-  });
 
   return countries;
 }
