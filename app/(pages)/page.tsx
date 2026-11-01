@@ -1,11 +1,52 @@
 import type { Metadata } from "next";
+import Link from "next/link";
+import { Suspense } from "react";
 
+import GlobeFallback from "@/components/GlobeFallback";
 import GlobeScene from "@/components/GlobeScene";
+import { getCountries } from "@/lib/countries";
+import { toCountryCardViews } from "@/lib/country-view";
 
 export const metadata: Metadata = {
   title: "Mundo | Terra em Movimento",
   description: "Explore o globo terrestre e os contornos dos países.",
 };
+
+async function HomeContent() {
+  const result = await getCountries();
+
+  if (result.status === "error") {
+    return (
+      <div className="rounded-2xl border border-danger/50 bg-surface p-8">
+        <h2 className="text-2xl font-semibold text-foreground">
+          Não foi possível carregar os países
+        </h2>
+        <p className="mt-3 text-muted">{result.error.message}</p>
+        <Link
+          className="mt-6 inline-flex rounded-lg border border-primary px-4 py-2 font-medium text-primary outline-none transition-colors hover:bg-primary/10 focus-visible:ring-2 focus-visible:ring-ring"
+          href="/paises"
+        >
+          Explorar países
+        </Link>
+      </div>
+    );
+  }
+
+  const countries = toCountryCardViews(result.countries);
+  const coordinates = Object.fromEntries(
+    result.countries.map((country) => [
+      country.code,
+      country.coordinates,
+    ]),
+  );
+
+  return (
+    <GlobeScene
+      countries={countries}
+      coordinates={coordinates}
+    />
+  );
+}
 
 export default function Home() {
   return (
@@ -27,7 +68,9 @@ export default function Home() {
             Explore os contornos dos países em um globo terrestre interativo.
           </p>
         </header>
-        <GlobeScene />
+        <Suspense fallback={<GlobeFallback kind="loading" />}>
+          <HomeContent />
+        </Suspense>
       </div>
     </div>
   );
