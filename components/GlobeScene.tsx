@@ -88,7 +88,13 @@ function escapeHtml(value: string) {
     .replaceAll("'", "&#39;");
 }
 
+let webglSupportCache: boolean | null = null;
+
 function supportsWebgl() {
+  if (webglSupportCache !== null) {
+    return webglSupportCache;
+  }
+
   const canvas = document.createElement("canvas");
   const context = canvas.getContext("webgl") ??
     canvas.getContext("experimental-webgl");
@@ -98,10 +104,12 @@ function supportsWebgl() {
     typeof WebGLRenderingContext === "undefined" ||
     !(context instanceof WebGLRenderingContext)
   ) {
+    webglSupportCache = false;
     return false;
   }
 
   context.getExtension("WEBGL_lose_context")?.loseContext();
+  webglSupportCache = true;
   return true;
 }
 
@@ -139,6 +147,11 @@ export default function GlobeScene({
   const [globeReady, setGlobeReady] = useState(false);
   const selectedRef = useRef<CountryCardView | null>(null);
   const globeRequest = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
+  const [globeKey, setGlobeKey] = useState(0);
+  const releaseRendererRef = useRef<(() => void) | null>(null);
+  const releaseRenderer = useCallback(() => {
+    releaseRendererRef.current?.();
+  }, []);
 
   useEffect(() => {
     selectedRef.current = selectedCountry;
@@ -148,7 +161,13 @@ export default function GlobeScene({
   // instância do globo é destruída e depois recriada. Até o próximo
   // onGlobeReady, o globo não está pronto: sem isto, o pedido de "Explorar
   // país" roda antes da nova instância e a câmera não voa.
-  useEffect(() => () => setGlobeReady(false), []);
+  useEffect(
+      () => () => {
+        releaseRenderer();
+        setGlobeReady(false);
+      },
+      [releaseRenderer],
+    );
 
   const linkedData = useMemo(
     () => linkFeaturesToCountries(features, countries),
@@ -276,6 +295,33 @@ export default function GlobeScene({
         countriesWithoutPolygon: linkedData.countriesWithoutPolygon,
       });
     }
+    // Libera o contexto WebGL de forma determinística (evita acumular
+    // contextos ao entrar e sair do Mundo várias vezes) e recria o globo se o
+    // navegador o perder: sem isso ele fica invisível, embora o hover continue
+    // funcionando.
+    releaseRendererRef.current?.();
+    const renderer = globe.renderer();
+    const canvas = renderer.domElement;
+    let recreateTimer: number | undefined;
+    const handleLost = () => {
+      console.warn("Globo: contexto WebGL perdido; recriando o globo.");
+      window.clearTimeout(recreateTimer);
+      recreateTimer = window.setTimeout(() => {
+        releaseRendererRef.current?.();
+        setGlobeReady(false);
+        setGlobeKey((key) => key + 1);
+      }, 800);
+    };
+    const handleRestored = () => window.clearTimeout(recreateTimer);
+    canvas.addEventListener("webglcontextlost", handleLost);
+    canvas.addEventListener("webglcontextrestored", handleRestored);
+    releaseRendererRef.current = () => {
+      window.clearTimeout(recreateTimer);
+      canvas.removeEventListener("webglcontextlost", handleLost);
+      canvas.removeEventListener("webglcontextrestored", handleRestored);
+      renderer.forceContextLoss();
+      releaseRendererRef.current = null;
+    };
     setGlobeReady(true);
   }, [coordinates, linkedData.countriesWithoutPolygon, linkedData.unmatchedFeatureCodes]);
 
@@ -433,6 +479,7 @@ export default function GlobeScene({
             <GlobeFallback kind="loading" />
           ) : (
             <Globe
+              key={globeKey}
               ref={globeRef}
               width={size.width}
               height={size.height}
