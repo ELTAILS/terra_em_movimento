@@ -8,6 +8,7 @@ import {
   useMemo,
   useRef,
   useState,
+  useSyncExternalStore,
 } from "react";
 import type { GlobeMethods } from "react-globe.gl";
 
@@ -20,6 +21,12 @@ import {
   type GlobePolygon,
 } from "@/lib/globe-data";
 import type { CountryCardView } from "@/lib/country-view";
+import {
+  consumeRequest,
+  getServerSnapshot,
+  getSnapshot,
+  subscribe,
+} from "@/lib/globe-intent";
 
 const Globe = dynamic(() => import("react-globe.gl"), {
   ssr: false,
@@ -130,7 +137,9 @@ export default function GlobeScene({
     null,
   );
   const [readyAt, setReadyAt] = useState<number | null>(null);
+  const [globeReady, setGlobeReady] = useState(false);
   const geoJsonReceivedAt = useRef<number | null>(null);
+  const globeRequest = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
 
   const linkedData = useMemo(
     () => linkFeaturesToCountries(features, countries),
@@ -258,6 +267,7 @@ export default function GlobeScene({
         countriesWithoutPolygon: linkedData.countriesWithoutPolygon,
       });
     }
+    setGlobeReady(true);
   }, [linkedData.countriesWithoutPolygon, linkedData.unmatchedFeatureCodes]);
 
   const handleHover = useCallback(
@@ -271,17 +281,8 @@ export default function GlobeScene({
     [selectedCountry, setGlobeRotation],
   );
 
-  const handleClick = useCallback(
-    (polygon: object) => {
-      if (!isGlobePolygon(polygon)) {
-        return;
-      }
-
-      const country = polygon.country;
-      if (!country) {
-        return;
-      }
-
+  const selectCountry = useCallback(
+    (country: CountryCardView) => {
       setSelectedCountry(country);
       setHoveredCountry(null);
       setGlobeRotation(false);
@@ -297,6 +298,29 @@ export default function GlobeScene({
     },
     [coordinates, onSelect, setGlobeRotation],
   );
+
+  const handleClick = useCallback(
+    (polygon: object) => {
+      if (!isGlobePolygon(polygon) || !polygon.country) {
+        return;
+      }
+
+      selectCountry(polygon.country);
+    },
+    [selectCountry],
+  );
+
+  useEffect(() => {
+    if (!globeReady || polygonsData.length === 0 || !globeRequest) {
+      return;
+    }
+
+    const country = countries.find((item) => item.id === globeRequest.countryId);
+    consumeRequest();
+    if (country) {
+      queueMicrotask(() => selectCountry(country));
+    }
+  }, [countries, globeReady, globeRequest, polygonsData.length, selectCountry]);
 
   const clearSelection = useCallback(() => {
     setSelectedCountry(null);

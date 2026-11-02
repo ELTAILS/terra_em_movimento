@@ -1,33 +1,22 @@
+import Link from "next/link";
+
 import {
   ArrowRightIcon,
-  CheckIcon,
 } from "@/components/icons";
+import { requestCountry } from "@/lib/globe-intent";
 import type { CountryCardView } from "@/lib/country-view";
 
 type CountryCardProps = {
   country: CountryCardView;
-  selected: boolean;
-  onSelect: (countryId: string) => void;
 };
 
 export default function CountryCard({
   country,
-  selected,
-  onSelect,
 }: CountryCardProps) {
   return (
     <article
-      className={`group relative flex min-h-[360px] flex-col overflow-hidden rounded-2xl border bg-surface p-5 transition motion-safe:duration-200 ${
-        selected
-          ? "border-primary shadow-[0_0_24px_rgba(56,189,248,0.14)]"
-          : "border-border hover:border-primary/60"
-      }`}
+      className="group relative flex min-h-[360px] flex-col overflow-hidden rounded-2xl border border-border bg-surface p-5 transition hover:border-primary/60 motion-safe:duration-200"
     >
-      {selected && (
-        <span className="absolute right-4 top-4 rounded-full border border-primary/50 bg-primary/10 px-2 py-1 text-[10px] font-semibold tracking-[0.16em] text-primary">
-          SELECIONADO
-        </span>
-      )}
       <div className="flex items-start justify-between gap-4">
         <div className="flex h-16 w-20 items-center justify-center rounded-xl border border-border bg-surface-elevated text-4xl">
           {country.flagUrl ? (
@@ -55,10 +44,7 @@ export default function CountryCard({
         <p className="text-xs font-medium uppercase tracking-[0.18em] text-muted">
           {country.subregion}
         </p>
-        <h2 className="mt-2 flex items-center gap-2 text-xl font-semibold text-foreground">
-          {country.name}
-          {selected && <CheckIcon aria-hidden="true" className="h-5 w-5 shrink-0 text-primary" />}
-        </h2>
+        <h2 className="mt-2 text-xl font-semibold text-foreground">{country.name}</h2>
       </div>
       <dl className="mt-5 grid grid-cols-2 gap-3 rounded-xl bg-surface-elevated p-4 text-sm">
         <div>
@@ -80,16 +66,15 @@ export default function CountryCard({
       </dl>
       <div className="mt-auto flex items-center justify-between gap-3 pt-5">
         <span className="font-mono text-xs text-muted">{country.coordinates}</span>
-        <button
-          type="button"
-          aria-pressed={selected}
-          aria-label={`${selected ? "País selecionado" : "Selecionar"} ${country.name}`}
-          onClick={() => onSelect(country.id)}
+        <Link
+          href="/"
+          aria-label={`Explorar ${country.name} no globo`}
+          onClick={() => requestCountry(country.id)}
           className="inline-flex min-h-11 items-center gap-2 rounded-lg px-2 text-sm font-medium text-primary outline-none transition hover:bg-primary/10 focus-visible:ring-2 focus-visible:ring-ring motion-safe:duration-150"
         >
           Explorar país
           <ArrowRightIcon aria-hidden="true" className="h-4 w-4" />
-        </button>
+        </Link>
       </div>
     </article>
   );
