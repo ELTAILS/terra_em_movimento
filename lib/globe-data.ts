@@ -63,12 +63,23 @@ export function parseGeoJson(value: unknown): GeoJsonFeatureCollection {
   };
 }
 
-export function getFeatureCode(feature: GeoJsonFeature): string | null {
-  const code = feature.properties?.["ISO3166-1-Alpha-2"];
+// Exceções do arquivo GeoJSON (ver docs/data/geojson-origem.md)
+const CODE_ALIASES: Record<string, string> = { "CN-TW": "TW" };
+const NAME_ALIASES: Record<string, string> = { Kosovo: "XK" };
 
-  return typeof code === "string" && /^[A-Z]{2}$/.test(code.toUpperCase())
-    ? code.toUpperCase()
-    : null;
+export function getFeatureCode(feature: GeoJsonFeature): string | null {
+  const raw = feature.properties?.["ISO3166-1-Alpha-2"];
+  const code = typeof raw === "string" ? raw.toUpperCase() : "";
+
+  if (CODE_ALIASES[code]) {
+    return CODE_ALIASES[code];
+  }
+  if (/^[A-Z]{2}$/.test(code)) {
+    return code;
+  }
+
+  const name = feature.properties?.["name"];
+  return typeof name === "string" ? (NAME_ALIASES[name] ?? null) : null;
 }
 
 export function linkFeaturesToCountries(
@@ -83,7 +94,10 @@ export function linkFeaturesToCountries(
 
   const polygons = features.map((feature) => {
     const featureCode = getFeatureCode(feature);
-    const lookupCode = featureCode === "CN-TW" ? "TW" : featureCode;
+    if (!featureCode) {
+      return { feature, country: null };
+    }
+    const lookupCode = featureCode;
     const country = lookupCode ? countriesByCode.get(lookupCode) ?? null : null;
 
     if (lookupCode && country) {
