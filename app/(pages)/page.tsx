@@ -68,6 +68,14 @@ export default function Home() {
             Explore os contornos dos países em um globo terrestre interativo.
           </p>
         </header>
+
+        {/* Aviso caso o globo não aparecer */}
+        <div className="mb-6 rounded-2xl border border-warning/50 bg-warning/10 p-4">
+          <p className="text-sm text-warning">
+            Atenção: Se o globo não aparecer, tente recarregar a página.
+          </p>
+        </div>
+
         <Suspense fallback={<GlobeFallback kind="loading" />}>
           <HomeContent />
         </Suspense>
