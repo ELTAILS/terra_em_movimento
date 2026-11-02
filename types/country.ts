@@ -26,12 +26,14 @@ export type CountryLanguage = {
 export type Country = {
   code: string;
   alpha3Code: string | null;
+  numericCode: string | null;
   name: string;
   officialName: string | null;
   capitals: string[];
   region: string | null;
   subregion: string | null;
   population: number | null;
+  timezones: string[];
   coordinates: CountryCoordinate | null;
   flag: CountryFlag;
   languages: CountryLanguage[];

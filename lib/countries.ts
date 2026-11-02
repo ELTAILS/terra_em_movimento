@@ -12,15 +12,19 @@ import type {
 
 const API_URL = "https://api.restcountries.com/countries/v5";
 const PAGE_SIZE = 100;
+const MAX_PAGES = 5;
+const FETCH_TIMEOUT_MS = 10_000;
 const RESPONSE_FIELDS = [
   "names.common",
   "names.official",
   "codes.alpha_2",
   "codes.alpha_3",
+  "codes.ccn3",
   "capitals",
   "region",
   "subregion",
   "population",
+  "timezones",
   "coordinates",
   "flag.emoji",
   "flag.url_svg",
@@ -73,7 +77,7 @@ function readNumber(value: unknown): number | null {
   return typeof value === "number" && Number.isFinite(value) ? value : null;
 }
 
-function isNonNegativeInteger(value: unknown): boolean {
+function isNonNegativeInteger(value: unknown): value is number {
   return (
     typeof value === "number" &&
     Number.isInteger(value) &&
@@ -160,6 +164,7 @@ function normalizeCountry(value: unknown): Country | null {
   return {
     code,
     alpha3Code: readString(codes?.alpha_3)?.toUpperCase() ?? null,
+    numericCode: readString(codes?.ccn3),
     name,
     officialName: readString(names?.official),
     capitals: readStringArray(record?.capitals).concat(
@@ -168,6 +173,7 @@ function normalizeCountry(value: unknown): Country | null {
     region: readString(record?.region),
     subregion: readString(record?.subregion),
     population: readNumber(record?.population),
+    timezones: readStringArray(record?.timezones),
     coordinates: readCoordinate(record?.coordinates),
     flag: {
       emoji: readString(flag?.emoji),
@@ -187,6 +193,9 @@ function normalizeCountry(value: unknown): Country | null {
 function normalizePage(value: unknown): {
   countries: Country[];
   more: boolean;
+  total: number;
+  discarded: number;
+  empty: boolean;
 } {
   const root = readRecord(value);
   const data = readRecord(root?.data);
@@ -204,17 +213,25 @@ function normalizePage(value: unknown): {
     throw new CountryFetchError("malformed-response");
   }
 
+  const countries = objects
+    .map(normalizeCountry)
+    .filter((country): country is Country => country !== null);
+
   return {
-    countries: objects
-      .map(normalizeCountry)
-      .filter((country): country is Country => country !== null),
+    countries,
     more: meta.more,
+    total: meta.total,
+    discarded: objects.length - countries.length,
+    empty: objects.length === 0,
   };
 }
 
 async function fetchCountriesPage(apiKey: string, offset: number): Promise<{
   countries: Country[];
   more: boolean;
+  total: number;
+  discarded: number;
+  empty: boolean;
 }> {
   const params = new URLSearchParams({
     response_fields: RESPONSE_FIELDS,
@@ -227,15 +244,11 @@ async function fetchCountriesPage(apiKey: string, offset: number): Promise<{
   try {
     response = await fetch(`${API_URL}?${params.toString()}`, {
       headers: { Authorization: `Bearer ${apiKey}` },
+      signal: AbortSignal.timeout(FETCH_TIMEOUT_MS),
     });
   } catch {
     throw new CountryFetchError("network");
   }
-
-  console.log("REST Countries request", {
-    offset,
-    status: response.status,
-  });
 
   if (response.status === 401) {
     throw new CountryFetchError("unauthorized", response.status);
@@ -274,12 +287,18 @@ async function getCachedCountries(): Promise<Country[]> {
   const countries: Country[] = [];
   let offset = 0;
   let more = true;
+  let pageCount = 0;
 
-  while (more) {
+  while (more && pageCount < MAX_PAGES) {
     const page = await fetchCountriesPage(apiKey, offset);
     countries.push(...page.countries);
     more = page.more;
     offset += PAGE_SIZE;
+    pageCount += 1;
+
+    if (page.empty) {
+      break;
+    }
   }
 
   if (countries.length === 0) {
@@ -325,18 +344,19 @@ export async function getCountries(): Promise<CountriesResult> {
       return { status: "success", countries: mockCountries };
     }
 
-    return {
-      status: "error",
-      error: {
-        reason: "missing-key",
-        message: errorMessage("missing-key"),
-      },
-    };
   }
 
   try {
     return { status: "success", countries: await getCachedCountries() };
   } catch (error) {
+    if (
+      process.env.NODE_ENV === "production" &&
+      error instanceof CountryFetchError &&
+      error.reason === "missing-key"
+    ) {
+      throw error;
+    }
+
     return { status: "error", error: toDataError(error) };
   }
 }
